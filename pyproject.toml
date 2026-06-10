@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-scope"
+version = "0.0.1"
+description = "Charles Proxy for AI tool calls — a local-first MCP proxy that records what your real agent actually does."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Lich Bui", email = "lich.bui@gmail.com" }]
+keywords = ["mcp", "model-context-protocol", "proxy", "observability", "debugging"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Debuggers",
+]
+dependencies = [
+    "mcp>=1.0",
+    "textual>=0.80",
+    "aiosqlite>=0.20",
+    "typer>=0.12",
+    "httpx>=0.27",
+]
+
+[project.urls]
+Homepage = "https://mcpscope.pages.dev"
+
+[project.scripts]
+mcpscope = "mcpscope.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcpscope"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
