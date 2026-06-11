@@ -202,6 +202,12 @@ MCP's current remote transport is **Streamable HTTP** (the older HTTP+SSE transp
 deprecated but still deployed — verify current spec status before building; support
 streamable HTTP first, legacy SSE only if cheap).
 
+> **Deviation note (2026-06-11):** spec verified at build time — current stable is
+> 2025-11-25 (Streamable HTTP unchanged); the 2026-07-28 RC adds Mcp-Method/Mcp-Name
+> routing headers, which a verbatim proxy forwards untouched. Legacy HTTP+SSE was NOT
+> implemented — vendors are switching it off (e.g. Atlassian), so not worth it.
+> Revisit only if a real user asks.
+
 - [ ] `proxy/http.py`: local reverse proxy — `mcpscope run --http <upstream-url>`
       listens on `localhost:<port>`, forwards verbatim via httpx (streaming), tees
       request/response bodies + SSE events to the same store. Agent config points at

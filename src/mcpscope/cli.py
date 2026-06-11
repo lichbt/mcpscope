@@ -57,19 +57,41 @@ def _version_callback(
 )
 def run(
     ctx: typer.Context,
+    http: Optional[str] = typer.Option(
+        None, "--http", help="Proxy a remote MCP server: upstream URL (streamable HTTP)"
+    ),
+    port: int = typer.Option(
+        6280, "--port", help="Local port to listen on with --http (0 = random)"
+    ),
     db: Optional[Path] = DbOption,
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No stderr chatter"),
 ) -> None:
-    """Run a stdio MCP server under the proxy: mcpscope run -- <command> [args...]
+    """Run an MCP server under the proxy.
 
-    Everything after `--` is the real server command line. stdout/stdin are the
-    protocol channel and pass through verbatim.
+    stdio:  mcpscope run -- <command> [args...]   (everything after -- is the
+    real server command line; stdin/stdout pass through verbatim)
+
+    HTTP:   mcpscope run --http https://host/mcp [--port 6280]   (point your
+    agent at http://127.0.0.1:<port>/<same path>)
     """
     argv = list(ctx.args)
     if argv and argv[0] == "--":
         argv = argv[1:]
+    if http and argv:
+        err.print("[red]--http and a stdio command are mutually exclusive[/red]")
+        raise typer.Exit(2)
+    if http:
+        from mcpscope.proxy.http import run_http_proxy
+
+        returncode = asyncio.run(
+            run_http_proxy(http, _db_path(db), port=port, quiet=quiet)
+        )
+        raise typer.Exit(returncode)
     if not argv:
-        err.print("[red]usage: mcpscope run -- <server command> [args...][/red]")
+        err.print(
+            "[red]usage: mcpscope run -- <server command> [args...]"
+            "  |  mcpscope run --http <url>[/red]"
+        )
         raise typer.Exit(2)
     from mcpscope.proxy.stdio import run_stdio_proxy
 
