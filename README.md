@@ -5,7 +5,7 @@ MCP client (Claude Desktop, or any agent) and its MCP servers, passively records
 every JSON-RPC message to SQLite, and shows a live terminal UI.
 
 ```sh
-pip install mcp-scope
+pip install mcpscope-cli
 ```
 
 ![mcpscope TUI](docs/demo.gif)

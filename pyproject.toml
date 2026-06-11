@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mcp-scope"
+name = "mcpscope-cli"
 version = "0.1.0"
 description = "Charles Proxy for AI tool calls — a local-first MCP proxy that records what your real agent actually does."
 readme = "README.md"
