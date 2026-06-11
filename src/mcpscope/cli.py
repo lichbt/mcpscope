@@ -43,12 +43,18 @@ def _connect(db: Optional[Path]) -> sqlite3.Connection:
     return conn
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def _version_callback(
-    version: bool = typer.Option(False, "--version", help="Print version and exit")
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False, "--version", help="Print version and exit", is_eager=True
+    ),
 ) -> None:
     if version:
         console.print(f"mcpscope {__version__}")
+        raise typer.Exit()
+    if ctx.invoked_subcommand is None:
+        console.print(ctx.get_help())
         raise typer.Exit()
 
 
