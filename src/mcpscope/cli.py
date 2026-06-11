@@ -69,6 +69,9 @@ def run(
     port: int = typer.Option(
         6280, "--port", help="Local port to listen on with --http (0 = random)"
     ),
+    with_ui: bool = typer.Option(
+        False, "--ui", help="Show the TUI alongside the proxy (HTTP mode only)"
+    ),
     db: Optional[Path] = DbOption,
     quiet: bool = typer.Option(False, "--quiet", "-q", help="No stderr chatter"),
 ) -> None:
@@ -87,12 +90,30 @@ def run(
         err.print("[red]--http and a stdio command are mutually exclusive[/red]")
         raise typer.Exit(2)
     if http:
+        if with_ui:
+            from mcpscope.proxy.http import HttpProxy
+            from mcpscope.tui.app import MCPScopeApp
+
+            path = _db_path(db)
+            MCPScopeApp(
+                path,
+                follow=True,
+                proxy_factory=lambda: HttpProxy(http, path, port=port, quiet=True),
+            ).run()
+            raise typer.Exit(0)
         from mcpscope.proxy.http import run_http_proxy
 
         returncode = asyncio.run(
             run_http_proxy(http, _db_path(db), port=port, quiet=quiet)
         )
         raise typer.Exit(returncode)
+    if with_ui:
+        err.print(
+            "[red]--ui works with --http only (stdio mode has no terminal: the"
+            " client owns stdin/stdout). Use `mcpscope ui --follow` in another"
+            " terminal instead.[/red]"
+        )
+        raise typer.Exit(2)
     if not argv:
         err.print(
             "[red]usage: mcpscope run -- <server command> [args...]"
@@ -144,6 +165,26 @@ def detach(
             f"{change.after['command']} {' '.join(change.after['args'] or [])}"
         )
     console.print("Restart Claude Desktop to apply.")
+
+
+@app.command()
+def ui(
+    session: Optional[int] = typer.Option(
+        None, "--session", "-s", help="Session id to view (default: latest)"
+    ),
+    follow: bool = typer.Option(
+        False, "--follow", "-f", help="Auto-scroll and switch to the newest session"
+    ),
+    db: Optional[Path] = DbOption,
+) -> None:
+    """Open the terminal UI on recorded (or live) sessions."""
+    path = _db_path(db)
+    if not path.exists():
+        err.print(f"[red]no database at {path} — record a session first[/red]")
+        raise typer.Exit(1)
+    from mcpscope.tui.app import MCPScopeApp
+
+    MCPScopeApp(path, session_id=session, follow=follow).run()
 
 
 @app.command()
