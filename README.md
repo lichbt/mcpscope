@@ -67,6 +67,25 @@ mcpscope ui                    # TUI: arrows to inspect, / to filter, f to follo
 Recordings live in `~/.mcpscope/mcpscope.db` (override with `--db` or
 `$MCPSCOPE_DB`). It's plain SQLite — query it with anything.
 
+## Simpler alternatives (use them when they fit)
+
+Credit where due — for a quick look at a single live session you may not
+need a proxy at all:
+
+- **Claude Desktop's own logs** (`~/Library/Logs/Claude/mcp*.log`, Windows
+  `%APPDATA%\Claude\logs`) contain the full message exchanges, both
+  directions. `tail -F` them during a conversation.
+- **A tee wrapper:** ~10 lines of shell that tee stdin/stdout to a file
+  before exec-ing the real server. Same architecture as mcpscope, minus
+  everything below.
+- **`notifications/message`** gives you structured server-side logs across
+  all transports — if you control the server.
+
+Reach for mcpscope when you want the parts that come *after* capture:
+request↔response pairing by JSON-RPC id, latency and error status (including
+tool-level `isError`, which looks like success in a raw stream), history you
+can query across sessions, non-Claude clients and HTTP transports, and a UI.
+
 ## What it is / what it is not
 
 **It is** a passive observer for agents you run: a flight recorder for MCP
